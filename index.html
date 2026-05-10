@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Receipt Scanner (AI)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+    <!-- Authentication Section -->
+    <div id="auth-section" class="container">
+        <div class="logo">
+            <h1>🧾 Smart Receipt Scanner</h1>
+            <p>สแกนใบเสร็จด้วย AI อัจฉริยะ</p>
+        </div>
+        
+        <!-- Login Form -->
+        <div id="login-form-container">
+            <h3>🔐 เข้าสู่ระบบ</h3>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-email">อีเมล</label>
+                    <input type="email" id="login-email" placeholder="example@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">รหัสผ่าน</label>
+                    <input type="password" id="login-password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary">เข้าสู่ระบบ</button>
+            </form>
+            <p class="switch-form">ยังไม่มีบัญชี? <a href="#" id="show-register">สมัครสมาชิกที่นี่</a></p>
+        </div>
+
+        <!-- Register Form -->
+        <div id="register-form-container" class="hidden">
+            <h3>📝 สมัครสมาชิก</h3>
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="reg-username">ชื่อผู้ใช้</label>
+                    <input type="text" id="reg-username" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-email">อีเมล</label>
+                    <input type="email" id="reg-email" placeholder="example@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-password">รหัสผ่าน</label>
+                    <input type="password" id="reg-password" placeholder="อย่างน้อย 6 ตัวอักษร" required minlength="6">
+                </div>
+                <button type="submit" class="btn-primary">สมัครสมาชิก</button>
+            </form>
+            <p class="switch-form">มีบัญชีอยู่แล้ว? <a href="#" id="show-login">เข้าสู่ระบบที่นี่</a></p>
+        </div>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboard-section" class="container hidden">
+        <header class="dashboard-header">
+            <div>
+                <h2 id="welcome-message">Dashboard</h2>
+                <p class="subtitle">จัดการและติดตามค่าใช้จ่ายของคุณ</p>
+            </div>
+            <div class="header-actions">
+                <!-- Dark Mode Toggle -->
+                <button id="theme-toggle" class="btn-icon" title="สลับโหมดมืด/สว่าง" aria-label="Toggle dark mode">
+                    <span id="theme-icon">🌙</span>
+                </button>
+                <button id="logout-btn" class="btn-danger">ออกจากระบบ</button>
+            </div>
+        </header>
+
+        <!-- Summary Stats -->
+        <div class="stats-row" id="stats-row">
+            <div class="stat-card">
+                <div class="stat-label">รายการทั้งหมด</div>
+                <div class="stat-value" id="stat-total-count">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">ยอดรวมเดือนนี้</div>
+                <div class="stat-value" id="stat-month-total">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">หมวดหมู่หลัก</div>
+                <div class="stat-value" id="stat-top-category">—</div>
+            </div>
+        </div>
+
+        <!-- Upload Card -->
+        <div class="upload-card">
+            <h3>📸 สแกนใบเสร็จใหม่</h3>
+            <p class="card-description">ถ่ายรูปหรือเลือกไฟล์ใบเสร็จเพื่อให้ AI วิเคราะห์</p>
+            <form id="upload-form">
+                <div class="file-upload-wrapper">
+                    <input type="file" id="receipt-file" accept="image/*" capture="environment" required>
+                    <label for="receipt-file" class="file-label">
+                        <span>📁 เลือกไฟล์รูปภาพ</span>
+                    </label>
+                </div>
+                <button type="submit" id="upload-btn" class="btn-primary">
+                    🚀 ส่งให้ AI วิเคราะห์
+                </button>
+            </form>
+            <div id="upload-status" class="status-msg"></div>
+        </div>
+
+        <!-- Chart Card with Month Filter -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>📊 สรุปค่าใช้จ่ายแยกตามหมวดหมู่</h3>
+                <div class="filter-controls">
+                    <select id="month-filter" class="month-select" title="กรองตามเดือน">
+                        <option value="all">📅 ทุกเดือน</option>
+                    </select>
+                    <select id="chart-type" class="month-select" title="เลือกประเภทกราฟ">
+                        <option value="bar">📊 แท่ง</option>
+                        <option value="doughnut">🍩 โดนัท</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="expenseChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Receipts List Card -->
+        <div class="list-card">
+            <div class="list-header">
+                <h3>📋 รายการใบเสร็จ</h3>
+                <span class="receipt-count" id="receipt-count-label">0 รายการ</span>
+            </div>
+            <div id="receipts-list" class="receipts-list">
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <p>ยังไม่มีใบเสร็จ เริ่มสแกนใบเสร็จแรกของคุณได้เลย!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-icon">🗑️</div>
+            <h3>ยืนยันการลบ</h3>
+            <p>คุณต้องการลบใบเสร็จนี้ใช่หรือไม่?<br><small id="delete-receipt-name" style="color: var(--text-muted)"></small></p>
+            <div class="modal-actions">
+                <button id="confirm-delete-btn" class="btn-danger-modal">ลบเลย</button>
+                <button id="cancel-delete-btn" class="btn-secondary">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
